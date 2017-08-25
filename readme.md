@@ -2,7 +2,7 @@
 A package that helps developer to segregate the validation logic from controller to a separate dedicated class. Lumen doesn't have any `FormRequest` class like Laravel. This will let you do that. 
 
 ### Installation
-First of all, you will need composer installed. By running `composer intsall anik/form-request` from your terminal will install the package inside your project.
+First of all, you will need composer installed. By running `composer require anik/form-request` from your terminal will install the package inside your project.
 
 ### How to use?
 1. Create a class that extends `Anik\Form\FormRequest`
