@@ -1,6 +1,6 @@
 {
     "name": "anik/form-request",
-    "description": "Form request is a package that lets developer validate form requests in Lumen like Laravel does.",
+    "description": "Form request is a package for Lumen that lets developer validate form requests like Laravel does.",
     "keywords": ["lumen", "form-request", "validation"],
     "type": "library",
     "require": {
