@@ -3,12 +3,9 @@
 use Illuminate\Http\Request;
 use Illuminate\Validation\UnauthorizedException;
 
-abstract class FormRequest
+abstract class FormRequest extends Request
 {
-	protected $request;
-
-	public function __construct (Request $request) {
-		$this->request = $request;
+	public function validate () {
 		if (false === $this->authorize()) {
 			throw new UnauthorizedException();
 		}
@@ -28,12 +25,5 @@ abstract class FormRequest
 
 	protected function messages () {
 		return [];
-	}
-
-	public function __call ($method, $args) {
-		return call_user_func([
-			$this->request,
-			$method,
-		], $args);
 	}
 }

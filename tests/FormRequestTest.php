@@ -3,7 +3,7 @@
 class FormRequestTest extends TestCase
 {
 	public function testValidationExceptionAgeIntegerRaised () {
-		$response = $this->call('get', "/", [
+		$response = $this->call('get', "form-request", [
 			'name' => 'ssi-anik',
 			'age'  => 'abcd',
 		]);
@@ -15,13 +15,13 @@ class FormRequestTest extends TestCase
 			'name' => 'ssi-anik',
 			'age'  => 12,
 		];
-		$response = $this->call('get', "/", $request);
+		$response = $this->call('get', "form-request", $request);
 		$this->assertEquals(200, $response->getStatusCode());
 		$this->assertEquals($response->getContent(), json_encode($request));
 	}
 
 	public function testValidationExceptionRaiseForAuthorization () {
-		$response = $this->call('get', "/", [
+		$response = $this->call('get', "form-request", [
 			'name' => 'poltu',
 			'age'  => 12,
 		]);
