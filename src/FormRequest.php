@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Anik\Form;
 
 use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Validation\ValidationException;
 use Laravel\Lumen\Http\Request;
 
@@ -20,6 +21,24 @@ abstract class FormRequest extends Request
      */
     protected $validator;
 
+    protected function errorMessage(): string
+    {
+        return 'The given data was invalid.';
+    }
+
+    protected function statusCode(): int
+    {
+        return 422;
+    }
+
+    protected function errorResponse(): ?JsonResponse
+    {
+        return response()->json([
+            'message' => $this->errorMessage(),
+            'errors' => $this->validator->errors()->messages(),
+        ], $this->statusCode());
+    }
+
     protected function failedAuthorization(): void
     {
         throw new AuthorizationException();
@@ -27,7 +46,7 @@ abstract class FormRequest extends Request
 
     protected function validationFailed(): void
     {
-        throw new ValidationException($this->validator);
+        throw new ValidationException($this->validator, $this->errorResponse());
     }
 
     protected function validationPassed()
