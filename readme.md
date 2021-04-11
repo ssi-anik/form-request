@@ -15,7 +15,7 @@ $app->register(\Anik\Form\FormRequestServiceProvider::class);
 - You must override `rules` method of the `Anik\Form\FormRequest` class. Define your validation rules in it. Must return an **array**.
 - You can define validation **messages** by overriding `messages` method. Default is `[]`.
 - You can define custom pretty **attribute** names by overriding `attributes` method. Default is `[]`.
-- You can override `authorize` method to define the authorization logic if the client is authorized to submit the form. Must return a boolean value. Default is `true`.
+- You can override `authorize` method to define the authorization logic if the client is authorized to submit the form. Must return a boolean value. Default is `true`. When returning `false`, it'll raise `\Illuminate\Auth\Access\AuthorizationException` exception.
 - If the validation fails, it will throw `Illuminate\Validation\ValidationException`.
     - By default, it returns response in `{"message": "The given data was invalid.", "errors": []}` format with status code `422`. Handle the exception in `app/Exceptions/Handler.php`'s `render` method if you want to modify the response.
     - Override the `statusCode` method to return the status of your choice. Must return `int`. Default is `422`.
