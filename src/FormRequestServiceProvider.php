@@ -1,28 +1,22 @@
-<?php namespace Anik\Form;
+<?php
 
-use Illuminate\Http\Request;
+declare(strict_types=1);
+
+namespace Anik\Form;
+
 use Illuminate\Support\ServiceProvider;
 
 class FormRequestServiceProvider extends ServiceProvider
 {
-    public function register () {
-    }
-
-    public function boot () {
-        $this->app->resolving(FormRequest::class, function ($request, $app) {
-            $this->initializeRequest($request, $app['request']);
+    public function boot()
+    {
+        $this->app->resolving(FormRequest::class, function ($form, $app) {
+            $form = FormRequest::createFrom($app['request'], $form);
+            $form->setContainer($app);
         });
 
-        $this->app->afterResolving(FormRequest::class, function ($form) {
+        $this->app->afterResolving(FormRequest::class, function (FormRequest $form) {
             $form->validate();
         });
-    }
-
-    protected function initializeRequest (FormRequest $form, Request $current) {
-        $files = $current->files->all();
-        $files = is_array($files) ? array_filter($files) : $files;
-        $form->initialize($current->query->all(), $current->request->all(), $current->attributes->all(), $current->cookies->all(), $files, $current->server->all(), $current->getContent());
-        $form->setJson($current->json());
-        $form->setUserResolver($current->getUserResolver());
     }
 }

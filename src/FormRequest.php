@@ -1,29 +1,99 @@
-<?php namespace Anik\Form;
+<?php
 
-use Illuminate\Http\Request;
-use Illuminate\Validation\UnauthorizedException;
+declare(strict_types=1);
+
+namespace Anik\Form;
+
+use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Validation\ValidationException;
+use Laravel\Lumen\Http\Request;
 
 abstract class FormRequest extends Request
 {
-	public function validate () {
-		if (false === $this->authorize()) {
-			throw new UnauthorizedException();
-		}
+    /**
+     * @var \Illuminate\Contracts\Container\Container
+     */
+    protected $app;
 
-		$validator = app('validator')->make($this->all(), $this->rules(), $this->messages());
+    /**
+     * @var \Illuminate\Contracts\Validation\Validator
+     */
+    protected $validator;
 
-		if ($validator->fails()) {
-			throw new ValidationException($validator->errors());
-		}
-	}
+    protected function errorMessage(): string
+    {
+        return 'The given data was invalid.';
+    }
 
-	protected function authorize () {
-		return true;
-	}
+    protected function statusCode(): int
+    {
+        return 422;
+    }
 
-	abstract protected function rules ();
+    protected function errorResponse(): ?JsonResponse
+    {
+        return response()->json([
+            'message' => $this->errorMessage(),
+            'errors' => $this->validator->errors()->messages(),
+        ], $this->statusCode());
+    }
 
-	protected function messages () {
-		return [];
-	}
+    protected function failedAuthorization(): void
+    {
+        throw new AuthorizationException();
+    }
+
+    protected function validationFailed(): void
+    {
+        throw new ValidationException($this->validator, $this->errorResponse());
+    }
+
+    protected function validationPassed()
+    {
+        //
+    }
+
+    public function validated(): array
+    {
+        return $this->validator->validated();
+    }
+
+    public function validate(): void
+    {
+        if (false === $this->authorize()) {
+            $this->failedAuthorization();
+        }
+
+        $this->validator = $this->app->make('validator')
+                                     ->make($this->all(), $this->rules(), $this->messages(), $this->attributes());
+
+        if ($this->validator->fails()) {
+            $this->validationFailed();
+        }
+
+        $this->validationPassed();
+    }
+
+    public function setContainer($app)
+    {
+        $this->app = $app;
+    }
+
+    protected function authorize(): bool
+    {
+        return true;
+    }
+
+    abstract protected function rules(): array;
+
+    protected function messages(): array
+    {
+        return [];
+    }
+
+    protected function attributes(): array
+    {
+        return [];
+    }
 }
