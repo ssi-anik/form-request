@@ -2,13 +2,24 @@
 A package that helps developer to segregate the validation logic from controller to a separate dedicated class. Lumen doesn't have any `FormRequest` class like Laravel. This will let you do that. 
 
 ### Installation
-1. First of all, you will need composer installed. By running `composer require anik/form-request` from your terminal will install the package inside your project.
-2. Register `Anik\Form\FormRequestServiceProvider` to your `bootstrap/app.php` as a provider
+1. Install the package by running `composer require anik/form-request` from your terminal being in the project directory.
+2. Register `\Anik\Form\FormRequestServiceProvider::class` to your `bootstrap/app.php` as a provider.
+
+```php
+// bootstrap/app.php
+$app->register(\Anik\Form\FormRequestServiceProvider::class);
+```
 
 ### How to use?
-1. Create a class that extends `Anik\Form\FormRequest`
-2. Override `rule` method from `FormRequest` class. Define your validation rules inside that method.
-3. You can define your messages by overriding `messages` method.
-4. `authorize` method is also available to guard the request. Return `true` or `false` from this method. This will raise `Unauthorized` exception.
-5. If the validation fails, it will throw exception of `Anik\Form\ValidationException` class. Handle it on your `app/Exception/Handle.php` file. `getResponse` method returns the messages.
-6. Now you can use your **Request** class in method injections. All the methods from `Illuminate\Http\Request` class is available.
+- Create a class that extends `Anik\Form\FormRequest` class.
+- You must override `rules` method of the `Anik\Form\FormRequest` class. Define your validation rules in it. Must return an **array**.
+- You can define validation **messages** by overriding `messages` method. Default is `[]`.
+- You can define custom pretty **attribute** names by overriding `attributes` method. Default is `[]`.
+- You can override `authorize` method to define the authorization logic if the client is authorized to submit the form. Must return a boolean value. Default is `true`.
+- If the validation fails, it will throw `Illuminate\Validation\ValidationException`.
+    - By default, it returns response in `{"message": "The given data was invalid.", "errors": []}` format with status code `422`. Handle the exception in `app/Exceptions/Handler.php`'s `render` method if you want to modify the response.
+    - Override the `statusCode` method to return the status of your choice. Must return `int`. Default is `422`.
+    - Override the `errorMessage` method to return the message of your choice. Must return `string`. Default is `The given data was invalid.`
+    - Override the `errorResponse` method to return response of your choice when the validation fails. Must return either of type `\Symfony\Component\HttpFoundation\Response` or `null`.
+- Now you can inject your **Request** class through the method injections. All the methods of `Laravel\Lumen\Http\Request` class is available in your request class.
+- The `FormRequest::validated()` method will return the validated data when the validation passes.
