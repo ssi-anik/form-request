@@ -1,4 +1,8 @@
 ## Form-Request
+[![codecov](https://codecov.io/gh/ssi-anik/form-request/branch/master/graph/badge.svg?token=1P5773S0SY)](https://codecov.io/gh/ssi-anik/form-request)
+[![Total Downloads](https://poser.pugx.org/anik/form-request/downloads)](//packagist.org/packages/anik/form-request)
+[![Latest Stable Version](https://poser.pugx.org/anik/form-request/v)](//packagist.org/packages/anik/form-request)
+---
 A package that helps developer to segregate the validation logic from controller to a separate dedicated class. Lumen doesn't have any `FormRequest` class like Laravel. This will let you do that. 
 
 ### Installation
