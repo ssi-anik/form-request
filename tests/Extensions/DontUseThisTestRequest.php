@@ -9,7 +9,7 @@ class DontUseThisTestRequest extends FormRequest
 {
     protected function authorize(): bool
     {
-        return !($this->request->has('unauthorized'));
+        return $this->request->has('unauthorized') ? false : parent::authorize();
     }
 
     protected function errorMessage(): string
