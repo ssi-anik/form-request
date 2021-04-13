@@ -1,0 +1,78 @@
+name: Run tests
+on:
+  pull_request:
+  push:
+    branches:
+      - master
+
+jobs:
+  tests:
+    name: PHP [${{ matrix.php }}] - Lumen [${{ matrix.lumen }}]
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ ubuntu-latest ]
+        php: [ 7.2, 7.3, 7.4, 8.0 ]
+        lumen: [ ^6, ^7, ^8 ]
+        exclude:
+          - php: 7.2
+            lumen: ^8
+          - php: 8.0
+            lumen: ^6
+          - php: 8.0
+            lumen: ^7
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+
+      #- name: Get Composer Cache Directory
+      #  id: composer-cache-dir
+      #  run: |
+      #    echo "::set-output name=dir::$(composer config cache-files-dir)"
+
+      #- name: Cache composer dependencies
+      #  id: composer-cache
+      #  uses: actions/cache@v2
+      #  with:
+      #    path: ${{ steps.composer-cache-dir.outputs.dir }}
+      #    key: dependencies-${{ runner.os }}-php-${{ matrix.php }}-composer-${{ hashFiles('**/composer.json') }}
+      #    restore-keys: dependencies-${{ runner.os }}-php-${{ matrix.php }}-composer-
+
+      - name: Install dependencies
+        # if: steps.composer-cache.outputs.cache-hit != 'true'
+        run: |
+          composer require laravel/lumen:${{ matrix.lumen }} --no-interaction --prefer-dist
+
+      - name: Run test suite
+        run: ./vendor/bin/phpunit --testdox --verbose
+
+  coverage:
+    name: Coverage
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          coverage: pcov
+          php-version: 8.0
+
+      - name: Install dependencies
+        run: composer require laravel/lumen:"^8" --no-interaction --prefer-dist
+
+      - name: Run tests for coverage
+        run: ./vendor/bin/phpunit --coverage-clover=coverage.xml
+
+      - name: Push to Codecov
+        run: bash <(curl -s https://codecov.io/bash)
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
