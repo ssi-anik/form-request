@@ -31,5 +31,6 @@
             "email": "sirajul.islam.anik@gmail.com"
         }
     ],
-    "minimum-stability": "dev"
+    "minimum-stability": "dev",
+    "prefer-stable": true
 }
