@@ -1,31 +1,100 @@
 <?php
 
+namespace Anik\Form\Test;
+
+use Anik\Form\FormRequestServiceProvider;
+use Anik\Form\Test\Extensions\DontUseThisTestRequest;
+use Anik\Form\Test\Extensions\DontUseThisTestRequestAuthorizationError;
+use Anik\Testbench\TestCase;
+use Laravel\Lumen\Routing\Router;
+
 class FormRequestTest extends TestCase
 {
-	public function testValidationExceptionAgeIntegerRaised () {
-		$response = $this->call('get', "form-request", [
-			'name' => 'ssi-anik',
-			'age'  => 'abcd',
-		]);
-		$this->assertEquals(422, $response->getStatusCode());
-	}
+    protected function setUp(): void
+    {
+        parent::setUp();
+    }
 
-	public function testValidationPasses () {
-		$request = [
-			'name' => 'ssi-anik',
-			'age'  => 12,
-		];
-		$response = $this->call('get', "form-request", $request);
-		$this->assertEquals(200, $response->getStatusCode());
-		$this->assertEquals($response->getContent(), json_encode($request));
-	}
+    protected function serviceProviders(): array
+    {
+        return [FormRequestServiceProvider::class];
+    }
 
-	public function testValidationExceptionRaiseForAuthorization () {
-		$response = $this->call('get', "form-request", [
-			'name' => 'poltu',
-			'age'  => 12,
-		]);
-		$this->assertEquals(401, $response->getStatusCode());
-	}
+    protected function routes(Router $router): void
+    {
+        $router->post('form-request[/{param}]', function (DontUseThisTestRequest $request, $param = null) {
+            return response()->json([
+                'all' => $request->all(),
+                'validated' => $request->validated(),
+                'route_info' => $request->route(),
+                'param' => $request->route('param'),
+            ]);
+        });
+    }
 
+    public function testValidationExceptionForInvalidData()
+    {
+        $this->post('form-request', [
+            'name' => 'form-request',
+            'age' => 'test',
+        ])->seeStatusCode(422);
+    }
+
+    public function testValidationExceptionDefaultResponseFormat()
+    {
+        $response = $this->post('form-request')->seeStatusCode(422)->response->getData(true);
+        $this->assertIsString($response['message']);
+        $this->assertIsArray($response['errors']);
+    }
+
+    public function testValidationExceptionWithMessageAndStatusCode()
+    {
+        $response = $this->post('form-request', [
+            'error_message' => 'This should be error message',
+            'status_code' => 400,
+        ])->seeStatusCode(400)->response->getData(true);
+        $this->assertIsString($response['message']);
+        $this->assertTrue($response['message'] == 'This should be error message');
+    }
+
+    public function testValidationPasses()
+    {
+        $response = $this->post("form-request/testing", [
+            'name' => 'form-request',
+            'age' => 12,
+            'extra' => 'data',
+        ])->seeStatusCode(200)->response->getContent();
+        $response = json_decode($response, true);
+
+        $this->assertTrue($response['all']['extra'] == 'data');
+        $this->assertIsArray($response['route_info']);
+        $this->assertTrue('testing' === $response['param'], 'Found value: ' . $response['param']);
+        $this->assertTrue(count($response['validated']) == 2, 'More than 2 is returned in the validated field');
+    }
+
+    public function testAuthorizationForRequest()
+    {
+        $this->post('form-request', ['unauthorized' => true])->seeStatusCode(403);
+    }
+
+    public function testMessages()
+    {
+        $response = $this->post('form-request', ['age' => 'age', 'message' => true])->response->getData(true);
+        $this->assertTrue('The age must be a number value' === $response['errors']['age'][0]);
+    }
+
+    public function testAttributes()
+    {
+        $response = $this->post('form-request', ['age' => 'age', 'attribute' => true])->response->getData(true);
+
+        $this->assertTrue('The oldness must be a number.' === $response['errors']['age'][0]);
+    }
+
+    public function testErrorResponse()
+    {
+        $response = $this->post('form-request', ['age' => 'age', 'response' => true])->response->getData(true);
+
+        $this->assertArrayHasKey('faults', $response);
+        $this->assertArrayHasKey('note', $response);
+    }
 }

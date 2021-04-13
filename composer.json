@@ -12,11 +12,16 @@
         "illuminate/support": "^6.0|^7.0|^8.0"
     },
     "require-dev": {
-        "phpunit/phpunit": "^7.5|^8.5.8|^9.3.3"
+        "anik/testbench-lumen": "^1.0"
     },
     "autoload": {
         "psr-4": {
             "Anik\\Form\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Anik\\Form\\Test\\": "tests"
         }
     },
     "license": "MIT",
