@@ -49,6 +49,15 @@ abstract class FormRequest extends Request
         throw new ValidationException($this->validator, $this->errorResponse());
     }
 
+    /**
+     * Allows to call any of validator methods
+     * before the validation rules are actually evaluated.
+     */
+    protected function withValidator(): void
+    {
+        //
+    }
+
     protected function validationPassed()
     {
         //
@@ -67,6 +76,7 @@ abstract class FormRequest extends Request
 
         $this->validator = $this->app->make('validator')
                                      ->make($this->all(), $this->rules(), $this->messages(), $this->attributes());
+        $this->withValidator();
 
         if ($this->validator->fails()) {
             $this->validationFailed();

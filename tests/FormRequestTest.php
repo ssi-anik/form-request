@@ -97,4 +97,14 @@ class FormRequestTest extends TestCase
         $this->assertArrayHasKey('faults', $response);
         $this->assertArrayHasKey('note', $response);
     }
+
+    public function testWithValidator()
+    {
+        $response = $this->post('form-request', ['name' => 'young Harry', 'age' => 112,])
+            ->seeStatusCode(422)
+            ->response
+            ->getData(true);
+        $this->assertIsString($response['message']);
+        $this->assertIsArray($response['errors']);
+    }
 }

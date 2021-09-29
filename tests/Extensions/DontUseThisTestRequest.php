@@ -63,4 +63,11 @@ class DontUseThisTestRequest extends FormRequest
             'age' => 'oldness',
         ];
     }
+
+    protected function withValidator(): void
+    {
+        $this->validator->sometimes('name', 'starts_with:old', function ($input) {
+            return $input->age >= 100;
+        });
+    }
 }
