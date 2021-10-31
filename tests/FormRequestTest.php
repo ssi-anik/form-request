@@ -54,7 +54,7 @@ class FormRequestTest extends TestCase
             'status_code' => 400,
         ])->seeStatusCode(400)->response->getData(true);
         $this->assertIsString($response['message']);
-        $this->assertTrue($response['message'] == 'This should be error message');
+        $this->assertSame('This should be error message', $response['message']);
     }
 
     public function testValidationPasses()
@@ -66,10 +66,10 @@ class FormRequestTest extends TestCase
         ])->seeStatusCode(200)->response->getContent();
         $response = json_decode($response, true);
 
-        $this->assertTrue($response['all']['extra'] == 'data');
+        $this->assertSame('data', $response['all']['extra']);
         $this->assertIsArray($response['route_info']);
-        $this->assertTrue('testing' === $response['param'], 'Found value: ' . $response['param']);
-        $this->assertTrue(count($response['validated']) == 2, 'More than 2 is returned in the validated field');
+        $this->assertSame('testing', $response['param'], 'Found value: ' . $response['param']);
+        $this->assertCount(2, $response['validated'], 'More than 2 is returned in the validated field');
     }
 
     public function testAuthorizationForRequest()
@@ -80,14 +80,14 @@ class FormRequestTest extends TestCase
     public function testMessages()
     {
         $response = $this->post('form-request', ['age' => 'age', 'message' => true])->response->getData(true);
-        $this->assertTrue('The age must be a number value' === $response['errors']['age'][0]);
+        $this->assertSame('The age must be a number value', $response['errors']['age'][0]);
     }
 
     public function testAttributes()
     {
         $response = $this->post('form-request', ['age' => 'age', 'attribute' => true])->response->getData(true);
 
-        $this->assertTrue('The oldness must be a number.' === $response['errors']['age'][0]);
+        $this->assertSame('The oldness must be a number.', $response['errors']['age'][0]);
     }
 
     public function testErrorResponse()
