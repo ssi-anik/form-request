@@ -65,6 +65,8 @@ abstract class FormRequest extends Request
             $this->failedAuthorization();
         }
 
+        $this->prepareForValidation();
+
         $this->validator = $this->app->make('validator')
                                      ->make($this->all(), $this->rules(), $this->messages(), $this->attributes());
 
@@ -73,6 +75,16 @@ abstract class FormRequest extends Request
         }
 
         $this->validationPassed();
+    }
+
+    /**
+     * Prepare the data for validation.
+     *
+     * @return void
+     */
+    protected function prepareForValidation()
+    {
+        // no default action
     }
 
     public function setContainer($app)
