@@ -24,7 +24,9 @@ jobs:
       - name: Check against PSR12 standard
         run: |
           `composer global config bin-dir --absolute --quiet`/phpcs --standard=PSR12 ./src
+
   tests:
+    needs: coding-standard
     name: PHP [${{ matrix.php }}] - Lumen [${{ matrix.lumen }}]
     runs-on: ${{ matrix.os }}
 
@@ -32,7 +34,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ ubuntu-latest ]
-        php: [ 8.0, 8.1, 8.2 ]
+        php: [ 8.1, 8.2 ]
         lumen: [ 10 ]
 
     steps:
